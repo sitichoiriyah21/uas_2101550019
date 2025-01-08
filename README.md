@@ -16,12 +16,132 @@ UAS Web Service
 
 ## LANGKAH-LANGKAH
 
-### 1. Persiapan Lingkungan
+
 1. Buka XAMPP lalu klik start pada Apache dan mySQL
+Salin dan tempel kode berikut dalam `menus_api.php`:
+
+```php
+<?php
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+$method = $_SERVER['REQUEST_METHOD'];
+$request = [];
+
+if (isset($_SERVER['PATH_INFO'])) {
+    $request = explode('/', trim($_SERVER['PATH_INFO'],'/'));
+}
+
+function getConnection() {
+    $host = 'localhost';
+    $db   = 'culinary';
+    $user = 'root';
+    $pass = ''; // Ganti dengan password MySQL Anda jika ada
+    $charset = 'utf8mb4';
+
+    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ];
+    try {
+        return new PDO($dsn, $user, $pass, $options);
+    } catch (\PDOException $e) {
+        throw new \PDOException($e->getMessage(), (int)$e->getCode());
+    }
+}
+
+function response($status, $data = NULL) {
+    header("HTTP/1.1 " . $status);
+    if ($data) {
+        echo json_encode($data);
+    }
+    exit();
+}
+
+$db = getConnection();
+
+switch ($method) {
+    case 'GET':
+        if (!empty($request) && isset($request[0])) {
+            $id = $request[0];
+            $stmt = $db->prepare("SELECT * FROM menus WHERE id = ?");
+            $stmt->execute([$id]);
+            $menu = $stmt->fetch();
+            if ($menu) {
+                response(200, $menu);
+            } else {
+                response(404, ["message" => "menu not found"]);
+            }
+        } else {
+            $stmt = $db->query("SELECT * FROM menus");
+            $menus = $stmt->fetchAll();
+            response(200, $menus);
+        }
+        break;
+    
+    case 'POST':
+        $data = json_decode(file_get_contents("php://input"));
+        if (!isset($data->name) || !isset($data->category) || !isset($data->price) || !isset($data->porsi)) {
+            response(400, ["message" => "Missing required fields"]);
+        }
+        $sql = "INSERT INTO menus (name, category, price, porsi) VALUES (?, ?, ?, ?)";
+        $stmt = $db->prepare($sql);
+        if ($stmt->execute([$data->name, $data->category, $data->price, $data->porsi])) {
+            response(201, ["message" => "Menu created", "id" => $db->lastInsertId()]);
+        } else {
+            response(500, ["message" => "Failed to create menu"]);
+        }
+        break;
+    
+    case 'PUT':
+        if (empty($request) || !isset($request[0])) {
+            response(400, ["message" => "menu ID is required"]);
+        }
+        $id = $request[0];
+        $data = json_decode(file_get_contents("php://input"));
+        if (!isset($data->name) || !isset($data->category) || !isset($data->price) || !isset($data->porsi)) {
+            response(400, ["message" => "Missing required fields"]);
+        }
+        $sql = "UPDATE menus SET name = ?, category = ?, price = ?, porsi = ? WHERE id = ?";
+        $stmt = $db->prepare($sql);
+        if ($stmt->execute([$data->name, $data->category, $data->price, $data->porsi, $id])) {
+            response(200, ["message" => "menu updated"]);
+        } else {
+            response(500, ["message" => "Failed to update menu"]);
+        }
+        break;
+    
+    case 'DELETE':
+        if (empty($request) || !isset($request[0])) {
+            response(400, ["message" => "Menu ID is required"]);
+        }
+        $id = $request[0];
+        $sql = "DELETE FROM menus WHERE id = ?";
+        $stmt = $db->prepare($sql);
+        if ($stmt->execute([$id])) {
+            response(200, ["message" => "menu deleted"]);
+        } else {
+            response(500, ["message" => "Failed to delete menu"]);
+        }
+        break;
+    
+    default:
+        response(405, ["message" => "Method not allowed"]);
+        break;
+}
+?>
+```
+
+
 2. Buat folder baru bernama `klien_menu` di dalam direktori `htdocs` XAMPP
 3. Buat file bernama `login.php`, `dashboard.php`, `config.php`, `logout.php`, `index.css` dalam folder `klien_menu`
 4. Berikut adalah kode masing-masing file
-- login.php
+
+### - login.php
 ```php
 <?php
 session_start();
@@ -139,8 +259,10 @@ if(isset($_POST['login'])) {
 </body>
 </html>
 ```
+![Login](https://github.com/user-attachments/assets/4778dbdd-a121-4231-a0b9-5d70b501de57)
 
-- dashboard.php
+
+###- dashboard.php
 ```php
 <?php
 session_start();
@@ -440,8 +562,12 @@ if(!isset($_SESSION['user_id'])) {
 </body>
 </html>
 ```
+![Dashboard](https://github.com/user-attachments/assets/f1561645-d253-48ee-b340-ed7c52440deb)
+![Dashboard1](https://github.com/user-attachments/assets/dee4adbc-70b9-4ad5-b540-64d10b65099e)
+![Dashboard2](https://github.com/user-attachments/assets/79f5c18d-db0e-481b-b812-f3b208aa6165)
 
-- config.php
+
+###- config.php
 ```php
 <?php
 $host = "localhost";
@@ -455,7 +581,8 @@ if (!$conn) {
 }
 ?>
 ```
-- logout.php
+
+###- logout.php
 ```php
 <?php
 session_start();
@@ -469,7 +596,7 @@ exit();
 ?>
 ```
 
-- index.css
+###- index.css
 ```php
 html {
 	scroll-behavior: smooth;
@@ -555,5 +682,246 @@ body {
 /*Akhir Home*/
 ```
 
-6. 
-7. *
+###- index.php
+```php
+<?php
+session_start();
+
+// Cek apakah user sudah login
+if(!isset($_SESSION['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+?>
+
+<!doctype html>
+<html lang="en">
+  <head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <link rel="stylesheet" type="text/css" href="fontawesome/css/all.min.css">
+
+    <title>Arek-arek Lesehan</title>
+    <link rel="shortcut icon" type="image" href="img/y.png">
+  </head>
+<body>
+
+        <!-- Jumbotron -->
+      <div class="jumbotron jumbotron-fluid text-center">
+        <div class="container">
+          <h1 class="display-4"><span class="font-weight-bold"> Arek-arek</span></h1>
+          <hr>
+          <p class="lead font-weight-bold">Kuliner Ndeso</p>
+        </div>
+      </div>
+  <!-- Akhir Jumbotron -->
+
+  <!-- Navbar -->
+      <nav class="navbar navbar-expand-lg bg-dark">
+        <div class="container">
+        <a class="navbar-brand text-white" href="admin.php" <img src="img/y.png" width="50px"><strong></strong> Arek-arek</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link mr-4" href="index.php">BERANDA</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link mr-4" href="dashboard.php">DAFTAR MENU</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link mr-4" href="pesanan.php">PESANAN</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link mr-4" href="logout.php">LOGOUT</a>
+            </li>
+          </ul>
+        </div>
+       </div> 
+      </nav>
+  <!-- Akhir Navbar -->
+  <!-- Menu -->    
+  <div class="container">
+        <div class="judul text-center mt-5">
+          <h3 class="font-weight-bold"> Arek-arek</h3>
+          <h5>Grobogan
+          <br>Buka Jam <strong>08:00-20:00</strong></h5>
+        </div>
+
+        <div class="row mb-5 mt-5 ">
+          <div class="col-md-6 d-flex justify-content-end">
+            <div class="card bg-dark text-white border-light">
+              <img src="img/b1.png" class="card-img" alt="Lihat Daftar Menu">
+              <div class="card-img-overlay mt-5 text-center">
+               <a href="dashboard.php" class="btn btn-danger">Lihat Menu</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 d-flex justify-content-start">
+            <div class="card bg-dark text-white border-light">
+              <img src="img/b1.png" class="card-img" alt="Lihat Pesanan">
+              <div class="card-img-overlay mt-5 text-center">
+               <a href="pesanan.php" class="btn btn-danger">Lihat Pesanan</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  <!-- Akhir Menu -->
+
+    <!-- Awal Footer -->
+    <hr class="footer">
+      <div class="container">
+        <div class="row footer-body">
+          <div class="col-md-6">
+          <div class="copyright">
+            <strong>Copyright</strong> <i class="far fa-copyright"></i> 2024 -  Designed by me</p>
+          </div>
+          </div>
+
+          <div class="col-md-6 d-flex justify-content-end">
+          <div class="icon-contact">
+          <label class="font-weight-bold">Follow Us </label>
+          <a href="#"><img src="img/fb.png" class="mr-3 ml-4" data-toggle="tooltip" title="Facebook"></a>
+          <a href="#"><img src="img/ig.png" class="mr-3" data-toggle="tooltip" title="Instagram"></a>
+          <a href="#"><img src="img/twitter.png" class="" data-toggle="tooltip" title="Twitter"></a>
+          </div>
+          </div>
+        </div>
+      </div>
+  <!-- Akhir Footer --> 
+</body>
+</html>
+```
+![index](https://github.com/user-attachments/assets/ed9990d2-6b02-44f7-b093-cc4a0daf72b1)
+![index1](https://github.com/user-attachments/assets/d88537ee-840a-4110-b0a8-6dadff8c7e22)
+
+
+
+Salin dan tempel kode berikut dalam `menus_api.php`:
+
+```php
+<?php
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+$method = $_SERVER['REQUEST_METHOD'];
+$request = [];
+
+if (isset($_SERVER['PATH_INFO'])) {
+    $request = explode('/', trim($_SERVER['PATH_INFO'],'/'));
+}
+
+function getConnection() {
+    $host = 'localhost';
+    $db   = 'culinary';
+    $user = 'root';
+    $pass = ''; // Ganti dengan password MySQL Anda jika ada
+    $charset = 'utf8mb4';
+
+    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ];
+    try {
+        return new PDO($dsn, $user, $pass, $options);
+    } catch (\PDOException $e) {
+        throw new \PDOException($e->getMessage(), (int)$e->getCode());
+    }
+}
+
+function response($status, $data = NULL) {
+    header("HTTP/1.1 " . $status);
+    if ($data) {
+        echo json_encode($data);
+    }
+    exit();
+}
+
+$db = getConnection();
+
+switch ($method) {
+    case 'GET':
+        if (!empty($request) && isset($request[0])) {
+            $id = $request[0];
+            $stmt = $db->prepare("SELECT * FROM menus WHERE id = ?");
+            $stmt->execute([$id]);
+            $menu = $stmt->fetch();
+            if ($menu) {
+                response(200, $menu);
+            } else {
+                response(404, ["message" => "menu not found"]);
+            }
+        } else {
+            $stmt = $db->query("SELECT * FROM menus");
+            $menus = $stmt->fetchAll();
+            response(200, $menus);
+        }
+        break;
+    
+    case 'POST':
+        $data = json_decode(file_get_contents("php://input"));
+        if (!isset($data->name) || !isset($data->category) || !isset($data->price) || !isset($data->porsi)) {
+            response(400, ["message" => "Missing required fields"]);
+        }
+        $sql = "INSERT INTO menus (name, category, price, porsi) VALUES (?, ?, ?, ?)";
+        $stmt = $db->prepare($sql);
+        if ($stmt->execute([$data->name, $data->category, $data->price, $data->porsi])) {
+            response(201, ["message" => "Menu created", "id" => $db->lastInsertId()]);
+        } else {
+            response(500, ["message" => "Failed to create menu"]);
+        }
+        break;
+    
+    case 'PUT':
+        if (empty($request) || !isset($request[0])) {
+            response(400, ["message" => "menu ID is required"]);
+        }
+        $id = $request[0];
+        $data = json_decode(file_get_contents("php://input"));
+        if (!isset($data->name) || !isset($data->category) || !isset($data->price) || !isset($data->porsi)) {
+            response(400, ["message" => "Missing required fields"]);
+        }
+        $sql = "UPDATE menus SET name = ?, category = ?, price = ?, porsi = ? WHERE id = ?";
+        $stmt = $db->prepare($sql);
+        if ($stmt->execute([$data->name, $data->category, $data->price, $data->porsi, $id])) {
+            response(200, ["message" => "menu updated"]);
+        } else {
+            response(500, ["message" => "Failed to update menu"]);
+        }
+        break;
+    
+    case 'DELETE':
+        if (empty($request) || !isset($request[0])) {
+            response(400, ["message" => "Menu ID is required"]);
+        }
+        $id = $request[0];
+        $sql = "DELETE FROM menus WHERE id = ?";
+        $stmt = $db->prepare($sql);
+        if ($stmt->execute([$id])) {
+            response(200, ["message" => "menu deleted"]);
+        } else {
+            response(500, ["message" => "Failed to delete menu"]);
+        }
+        break;
+    
+    default:
+        response(405, ["message" => "Method not allowed"]);
+        break;
+}
+?>
+```
