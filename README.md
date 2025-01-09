@@ -18,6 +18,7 @@ UAS Web Service
 
 
 1. Buka XAMPP lalu klik start pada Apache dan mySQL
+
 Salin dan tempel kode berikut dalam `menus_api.php`:
 
 ```php
@@ -138,10 +139,11 @@ switch ($method) {
 
 
 2. Buat folder baru bernama `klien_menu` di dalam direktori `htdocs` XAMPP
-3. Buat file bernama `login.php`, `dashboard.php`, `config.php`, `logout.php`, `index.css` dalam folder `klien_menu`
+3. Buat file bernama `login.php`, `dashboard.php`, `config.php`, `logout.php`, `index.php`, dan `index.css` dalam folder `klien_menu`
 4. Berikut adalah kode masing-masing file
 
-### - login.php
+
+### login.php
 ```php
 <?php
 session_start();
@@ -151,7 +153,7 @@ if(isset($_POST['login'])) {
     $username = $_POST['username'];
     $password = $_POST['password'];
     
-    // Gunakan fungsi PASSWORD() untuk mencocokkan dengan hasil di database
+    
     $query = "SELECT * FROM users WHERE username='$username' AND password=PASSWORD('$password')";
     $result = mysqli_query($conn, $query);
     
@@ -175,68 +177,68 @@ if(isset($_POST['login'])) {
     <title>Login</title>
     <style>
         body {
-            background-color: #e6e6fa; /* Warna latar belakang ungu muda */
-            font-family: Arial, sans-serif; /* Font yang lebih modern */
+            background-color: #e6e6fa; 
+            font-family: Arial, sans-serif; 
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh; /* Mengisi tinggi viewport */
+            height: 100vh; 
             margin: 0;
-            color: #333; /* Warna teks default */
+            color: #333; 
         }
         .login-container {
-            background-color: rgba(255, 255, 255, 0.9); /* Warna latar belakang untuk formulir dengan transparansi */
+            background-color: rgba(255, 255, 255, 0.9); 
             padding: 20px;
-            border-radius: 8px; /* Sudut yang membulat */
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Bayangan untuk efek kedalaman */
-            width: 300px; /* Lebar tetap untuk formulir */
+            border-radius: 8px; 
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); 
+            width: 300px; 
         }
         h1 {
-            text-align: center; /* Pusatkan judul */
-            color: rgb(180, 142, 166); /* Warna teks judul ungu */
-            margin-bottom: 20px; /* Jarak bawah judul */
+            text-align: center; 
+            color: rgb(180, 142, 166); 
+            margin-bottom: 20px; 
         }
         p {
-            margin: 10px 0; /* Jarak antar elemen */
+            margin: 10px 0; 
         }
         input[type="text"],
         input[type="password"] {
-            width: 100%; /* Lebar penuh */
-            padding: 10px; /* Padding untuk ruang dalam */
-            border: 1px solid #ccc; /* Border abu-abu */
-            border-radius: 5px; /* Sudut yang membulat */
-            box-sizing: border-box; /* Menghitung padding dan border dalam lebar */
-            font-size: 14px; /* Ukuran font */
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 5px; 
+            box-sizing: border-box; 
+            font-size: 14px; 
         }
         input[type="submit"],
         input[type="reset"] {
-            background-color: rgb(180, 142, 166); /* Warna latar belakang tombol ungu */
-            color: white; /* Warna teks tombol */
-            border: none; /* Tanpa border */
-            padding: 10px; /* Padding untuk tombol */
-            border-radius: 5px; /* Sudut yang membulat */
-            cursor: pointer; /* Kursor pointer saat hover */
-            width: 48%; /* Lebar tombol */
-            transition: background-color 0.3s; /* Transisi untuk efek hover */
-            margin-top: 10px; /* Jarak atas untuk tombol */
+            background-color: rgb(180, 142, 166); 
+            color: white; 
+            border: none; 
+            padding: 10px; 
+            border-radius: 5px; 
+            cursor: pointer;
+            width: 48%; 
+            transition: background-color 0.3s; 
+            margin-top: 10px; 
         }
         input[type="submit"]:hover,
         input[type="reset"]:hover {
-            background-color: rgb(150, 120, 140); /* Warna saat hover */
+            background-color: rgb(150, 120, 140); 
         }
         .button-container {
-            display: flex; /* Menggunakan flexbox untuk tombol */
-            justify-content: space-between; /* Jarak antar tombol */
+            display: flex; 
+            justify-content: space-between; 
         }
         .error {
-            color: red; /* Warna merah untuk pesan error */
-            text-align: center; /* Pusatkan pesan error */
+            color: red; 
+            text-align: center; 
         }
     </style>
 </head>
 <body>
 <div class="login-container">
-        <h1>Login Form</h1> <!-- Judul dipindahkan ke sini -->
+        <h1>Login Form</h1> 
         <?php if(isset($error)) { ?>
             <p class="error"><?php echo $error; ?></p>
         <?php } ?>
@@ -248,26 +250,27 @@ if(isset($_POST['login'])) {
         </p>
         <p>
             <label for="password">Password:</label>
-            <input type="password" name="password" required placeholder=" Masukkan Password"> <!-- Simbol untuk menunjukkan input password -->
+            <input type="password" name="password" required placeholder=" Masukkan Password"> 
         </p>
         <div class="button-container">
             <input type="submit" name="login" value="Login">
-            <input type="reset" value="Reset"> <!-- Tombol reset ditambahkan -->
+            <input type="reset" value="Reset"> 
         </div>
     </form>
 </div>
 </body>
 </html>
 ```
-![Login](https://github.com/user-attachments/assets/4778dbdd-a121-4231-a0b9-5d70b501de57)
+![login](https://github.com/user-attachments/assets/0aad608d-2981-444c-a47e-65b94455384b)
 
 
-###- dashboard.php
+
+### dashboard.php
 ```php
 <?php
 session_start();
 
-// Cek apakah user sudah login
+
 if(!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -562,12 +565,11 @@ if(!isset($_SESSION['user_id'])) {
 </body>
 </html>
 ```
-![Dashboard](https://github.com/user-attachments/assets/f1561645-d253-48ee-b340-ed7c52440deb)
-![Dashboard1](https://github.com/user-attachments/assets/dee4adbc-70b9-4ad5-b540-64d10b65099e)
-![Dashboard2](https://github.com/user-attachments/assets/79f5c18d-db0e-481b-b812-f3b208aa6165)
+![dashboard](https://github.com/user-attachments/assets/cf62e59f-34a8-40d6-a300-a590fe84e158)
+![tabel](https://github.com/user-attachments/assets/83445986-7670-473c-bfb8-2095ff20a491)
 
 
-###- config.php
+### config.php
 ```php
 <?php
 $host = "localhost";
@@ -582,7 +584,7 @@ if (!$conn) {
 ?>
 ```
 
-###- logout.php
+### logout.php
 ```php
 <?php
 session_start();
@@ -596,7 +598,7 @@ exit();
 ?>
 ```
 
-###- index.css
+### index.css
 ```php
 html {
 	scroll-behavior: smooth;
@@ -682,12 +684,12 @@ body {
 /*Akhir Home*/
 ```
 
-###- index.php
+### index.php
 ```php
 <?php
 session_start();
 
-// Cek apakah user sudah login
+
 if(!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit();
@@ -803,125 +805,22 @@ if(!isset($_SESSION['user_id'])) {
 </body>
 </html>
 ```
-![index](https://github.com/user-attachments/assets/ed9990d2-6b02-44f7-b093-cc4a0daf72b1)
-![index1](https://github.com/user-attachments/assets/d88537ee-840a-4110-b0a8-6dadff8c7e22)
+![index and beranda](https://github.com/user-attachments/assets/ddcceb0f-1175-49bf-95d8-70c3e08ad93a)
+![footer](https://github.com/user-attachments/assets/0c5e0949-ff4f-405e-a104-a84261540614)
 
 
+### Berikut adalah hasil fungsi setiap tombol
+#### Tombol Cari
+![cari](https://github.com/user-attachments/assets/ec6ee8bf-d38f-4620-b8f2-e0a933d57796)
 
-Salin dan tempel kode berikut dalam `menus_api.php`:
+#### Tombol Tambah
+![tambah2](https://github.com/user-attachments/assets/85c7c7b6-1b62-4e73-b11c-5926b962bfff)
+![hasil tambah](https://github.com/user-attachments/assets/50ddd391-96e5-4beb-b99d-4ddb16a65fca)
 
-```php
-<?php
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+#### Tombol Edit/update
+![edit update](https://github.com/user-attachments/assets/127c133e-7ffe-4536-8912-e0fe43509dba)
 
-$method = $_SERVER['REQUEST_METHOD'];
-$request = [];
+#### Tombol Hapus
+![delete](https://github.com/user-attachments/assets/4384193f-128b-4d09-ba1d-2d8c0278d5a2)
 
-if (isset($_SERVER['PATH_INFO'])) {
-    $request = explode('/', trim($_SERVER['PATH_INFO'],'/'));
-}
 
-function getConnection() {
-    $host = 'localhost';
-    $db   = 'culinary';
-    $user = 'root';
-    $pass = ''; // Ganti dengan password MySQL Anda jika ada
-    $charset = 'utf8mb4';
-
-    $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
-    $options = [
-        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_EMULATE_PREPARES   => false,
-    ];
-    try {
-        return new PDO($dsn, $user, $pass, $options);
-    } catch (\PDOException $e) {
-        throw new \PDOException($e->getMessage(), (int)$e->getCode());
-    }
-}
-
-function response($status, $data = NULL) {
-    header("HTTP/1.1 " . $status);
-    if ($data) {
-        echo json_encode($data);
-    }
-    exit();
-}
-
-$db = getConnection();
-
-switch ($method) {
-    case 'GET':
-        if (!empty($request) && isset($request[0])) {
-            $id = $request[0];
-            $stmt = $db->prepare("SELECT * FROM menus WHERE id = ?");
-            $stmt->execute([$id]);
-            $menu = $stmt->fetch();
-            if ($menu) {
-                response(200, $menu);
-            } else {
-                response(404, ["message" => "menu not found"]);
-            }
-        } else {
-            $stmt = $db->query("SELECT * FROM menus");
-            $menus = $stmt->fetchAll();
-            response(200, $menus);
-        }
-        break;
-    
-    case 'POST':
-        $data = json_decode(file_get_contents("php://input"));
-        if (!isset($data->name) || !isset($data->category) || !isset($data->price) || !isset($data->porsi)) {
-            response(400, ["message" => "Missing required fields"]);
-        }
-        $sql = "INSERT INTO menus (name, category, price, porsi) VALUES (?, ?, ?, ?)";
-        $stmt = $db->prepare($sql);
-        if ($stmt->execute([$data->name, $data->category, $data->price, $data->porsi])) {
-            response(201, ["message" => "Menu created", "id" => $db->lastInsertId()]);
-        } else {
-            response(500, ["message" => "Failed to create menu"]);
-        }
-        break;
-    
-    case 'PUT':
-        if (empty($request) || !isset($request[0])) {
-            response(400, ["message" => "menu ID is required"]);
-        }
-        $id = $request[0];
-        $data = json_decode(file_get_contents("php://input"));
-        if (!isset($data->name) || !isset($data->category) || !isset($data->price) || !isset($data->porsi)) {
-            response(400, ["message" => "Missing required fields"]);
-        }
-        $sql = "UPDATE menus SET name = ?, category = ?, price = ?, porsi = ? WHERE id = ?";
-        $stmt = $db->prepare($sql);
-        if ($stmt->execute([$data->name, $data->category, $data->price, $data->porsi, $id])) {
-            response(200, ["message" => "menu updated"]);
-        } else {
-            response(500, ["message" => "Failed to update menu"]);
-        }
-        break;
-    
-    case 'DELETE':
-        if (empty($request) || !isset($request[0])) {
-            response(400, ["message" => "Menu ID is required"]);
-        }
-        $id = $request[0];
-        $sql = "DELETE FROM menus WHERE id = ?";
-        $stmt = $db->prepare($sql);
-        if ($stmt->execute([$id])) {
-            response(200, ["message" => "menu deleted"]);
-        } else {
-            response(500, ["message" => "Failed to delete menu"]);
-        }
-        break;
-    
-    default:
-        response(405, ["message" => "Method not allowed"]);
-        break;
-}
-?>
-```
